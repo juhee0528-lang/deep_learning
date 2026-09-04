@@ -15,8 +15,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAX
 from torch.utils.data import DataLoader, TensorDataset
 
 
-POWER_PATH = '한국전력거래소_시간별 전국 전력수요량_20251231.csv'
-WEATHER_PATH = 'OBS_ASOS_TIM_20260904122533.csv'
+DATA_PATH = 'national_power_regional_weather_2025.csv'
 LOOKBACK = 24
 TARGET = 'power_demand_mwh'
 GRAPH_TITLE = 'National Power Demand and Regional Weather in 2025'
@@ -29,58 +28,14 @@ def mape(actual, predicted):
     return float(np.mean(np.abs((actual[mask] - predicted[mask]) / actual[mask])) * 100)
 
 
-def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
-    power = pd.read_csv(power_path)
-    hour_columns = [f'{hour}시' for hour in range(1, 25)]
-    power_long = power.melt(id_vars=['날짜'], value_vars=hour_columns,
-                            var_name='hour_label', value_name=TARGET)
-    power_long['datetime'] = pd.to_datetime(power_long['날짜']) + pd.to_timedelta(
-        power_long['hour_label'].str.rstrip('시').astype(int), unit='h')
-    power_long = power_long[['datetime', TARGET]]
-
-    weather = pd.read_csv(weather_path)
-    weather = weather.rename(columns={
-        '일시': 'datetime', '기온(°C)': 'temperature_c', '강수량(mm)': 'rainfall_mm',
-        '풍속(m/s)': 'wind_speed_ms', '습도(%)': 'humidity_pct',
-        '일조(hr)': 'sunshine_hr', '일사(MJ/m2)': 'solar_radiation_mj_m2'
-    })
-    weather['datetime'] = pd.to_datetime(weather['datetime'])
-    weather = weather[['지점명', 'datetime', 'temperature_c', 'rainfall_mm', 'wind_speed_ms',
-                       'humidity_pct', 'sunshine_hr', 'solar_radiation_mj_m2']]
-    zero_when_missing = ['rainfall_mm', 'sunshine_hr', 'solar_radiation_mj_m2']
-    weather[zero_when_missing] = weather[zero_when_missing].fillna(0)
-    continuous_weather = ['temperature_c', 'wind_speed_ms', 'humidity_pct']
-    weather[continuous_weather] = weather.groupby('지점명')[continuous_weather].transform(
-        lambda values: values.interpolate(limit_direction='both'))
-    regional_frames = []
-    for region, region_frame in weather.groupby('지점명'):
-        region_frame = region_frame.drop(columns='지점명').set_index('datetime')
-        region_frame = region_frame[~region_frame.index.duplicated(keep='first')]
-        region_frame = region_frame.reindex(pd.date_range('2025-01-01 01:00', periods=8760, freq='h'))
-        region_frame[continuous_weather] = region_frame[continuous_weather].interpolate(limit_direction='both')
-        region_frame[zero_when_missing] = region_frame[zero_when_missing].fillna(0)
-        region_frame.columns = [f'{region}_{column}' for column in region_frame.columns]
-        regional_frames.append(region_frame)
-    regional_weather = pd.concat(regional_frames, axis=1).reset_index(names='datetime')
-    data = power_long.merge(regional_weather, on='datetime', how='inner').sort_values('datetime')
-    data = data.drop_duplicates('datetime').set_index('datetime').asfreq('h')
-    regional_continuous = [column for column in data.columns
-                           if any(column.endswith(f'_{weather_column}')
-                                  for weather_column in continuous_weather)]
-    regional_zero = [column for column in data.columns
-                     if any(column.endswith(f'_{weather_column}')
-                            for weather_column in zero_when_missing)]
-    data[regional_continuous] = data[regional_continuous].interpolate(limit_direction='both')
-    data[regional_zero] = data[regional_zero].fillna(0)
-    data[TARGET] = data[TARGET].astype(float)
-    data['hour_sin'] = np.sin(2 * np.pi * data.index.hour / 24)
-    data['hour_cos'] = np.cos(2 * np.pi * data.index.hour / 24)
-    data['day_sin'] = np.sin(2 * np.pi * data.index.dayofweek / 7)
-    data['day_cos'] = np.cos(2 * np.pi * data.index.dayofweek / 7)
-    data['month_sin'] = np.sin(2 * np.pi * (data.index.month - 1) / 12)
-    data['month_cos'] = np.cos(2 * np.pi * (data.index.month - 1) / 12)
-    data['is_weekend'] = (data.index.dayofweek >= 5).astype(float)
-    return data.reset_index()
+def load_data(path=DATA_PATH):
+    data = pd.read_csv(path, parse_dates=['datetime']).sort_values('datetime')
+    data = data.drop_duplicates('datetime').reset_index(drop=True)
+    numeric_columns = [column for column in data.columns if column != 'datetime']
+    data[numeric_columns] = data[numeric_columns].apply(pd.to_numeric, errors='coerce')
+    if data[numeric_columns].isna().any().any():
+        raise ValueError('Merged CSV contains missing or non-numeric model features.')
+    return data
 
 
 def feature_columns(data):
@@ -260,7 +215,7 @@ def save_graphs(data, results):
 def main():
     torch.manual_seed(42)
     data = load_data()
-    data.to_csv('national_power_regional_weather_2025.csv', index=False)
+    data.to_csv(DATA_PATH, index=False)
     train, validation, test = split_by_time(data)
     train_end, val_end = len(train), len(train) + len(validation)
     input_scaler = StandardScaler().fit(train[feature_columns(data)])

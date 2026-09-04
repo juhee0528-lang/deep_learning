@@ -35,7 +35,7 @@ def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
     power_long = power.melt(id_vars=['날짜'], value_vars=hour_columns,
                             var_name='hour_label', value_name=TARGET)
     power_long['datetime'] = pd.to_datetime(power_long['날짜']) + pd.to_timedelta(
-        power_long['hour_label'].str.rstrip('시').astype(int) - 1, unit='h')
+        power_long['hour_label'].str.rstrip('시').astype(int), unit='h')
     power_long = power_long[['datetime', TARGET]]
 
     weather = pd.read_csv(weather_path)
@@ -47,7 +47,7 @@ def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
     weather['datetime'] = pd.to_datetime(weather['datetime'])
     weather = weather[['datetime', 'temperature_c', 'rainfall_mm', 'wind_speed_ms',
                        'humidity_pct', 'sunshine_hr', 'solar_radiation_mj_m2']]
-    data = power_long.merge(weather, on='datetime', how='left').sort_values('datetime')
+    data = power_long.merge(weather, on='datetime', how='inner').sort_values('datetime')
     data = data.drop_duplicates('datetime').set_index('datetime').asfreq('h')
     numeric_columns = data.columns
     data[numeric_columns] = data[numeric_columns].interpolate(limit_direction='both')
@@ -160,8 +160,7 @@ class Result:
     upper: np.ndarray
 
 
-def build_result(name, actual, predicted):
-    residual_std = float(np.std(actual - predicted, ddof=1))
+def build_result(name, actual, predicted, residual_std):
     margin = 1.96 * residual_std
     return Result(name, actual, predicted, predicted - margin, predicted + margin)
 
@@ -201,11 +200,16 @@ def save_graphs(data, results):
     axes[0].plot(dates, results[0].actual[:200], label='Actual national demand', linewidth=2)
     for result in results:
         axes[0].plot(dates, result.predicted[:200], label=f'{result.model} prediction', linewidth=1.5)
+    temperature_axis = axes[0].twinx()
+    temperature_axis.plot(dates, data['temperature_c'].iloc[test_start:test_start + 200],
+                           color='tab:orange', linestyle='--', label='Seoul temperature', linewidth=1.5)
     axes[0].set_title(GRAPH_TITLE)
     axes[0].set_xlabel('Datetime')
     axes[0].set_ylabel('Power demand (MWh)')
     axes[0].tick_params(axis='x', rotation=20)
-    axes[0].legend()
+    demand_handles, demand_labels = axes[0].get_legend_handles_labels()
+    temperature_handles, temperature_labels = temperature_axis.get_legend_handles_labels()
+    axes[0].legend(demand_handles + temperature_handles, demand_labels + temperature_labels)
     metric_frame = pd.DataFrame([metrics(result) for result in results])
     sns.barplot(data=metric_frame.melt(id_vars='model', value_vars=['MAE', 'RMSE']),
                 x='model', y='value', hue='variable', ax=axes[1])
@@ -239,15 +243,25 @@ def main():
     X_train, y_train, _ = make_sequences(data, input_scaler, target_scaler, 0, train_end)
     X_val, y_val, _ = make_sequences(data, input_scaler, target_scaler, train_end, val_end)
     X_test, y_test, timestamps = make_sequences(data, input_scaler, target_scaler, val_end, len(data))
+    actual_validation = target_scaler.inverse_transform(y_val.reshape(-1, 1)).ravel()
     actual_test = target_scaler.inverse_transform(y_test.reshape(-1, 1)).ravel()
     lstm = fit_deep_model(LSTMForecaster(X_train.shape[-1]), X_train, y_train, X_val, y_val)
     transformer = fit_deep_model(TransformerForecaster(X_train.shape[-1]), X_train, y_train, X_val, y_val)
+    lstm_validation_prediction = target_scaler.inverse_transform(predict(lstm, X_val).reshape(-1, 1)).ravel()
+    transformer_validation_prediction = target_scaler.inverse_transform(predict(transformer, X_val).reshape(-1, 1)).ravel()
     lstm_prediction = target_scaler.inverse_transform(predict(lstm, X_test).reshape(-1, 1)).ravel()
     transformer_prediction = target_scaler.inverse_transform(predict(transformer, X_test).reshape(-1, 1)).ravel()
-    arima_prediction = arima_forecast(train[TARGET].to_numpy(), len(actual_test))
-    results = [build_result('ARIMA', actual_test, arima_prediction),
-               build_result('LSTM', actual_test, lstm_prediction),
-               build_result('Transformer', actual_test, transformer_prediction)]
+    arima_all_prediction = arima_forecast(train[TARGET].to_numpy(), len(actual_validation) + len(actual_test))
+    arima_validation_prediction = arima_all_prediction[:len(actual_validation)]
+    arima_prediction = arima_all_prediction[len(actual_validation):]
+    results = [
+        build_result('ARIMA', actual_test, arima_prediction,
+                     np.std(actual_validation - arima_validation_prediction, ddof=1)),
+        build_result('LSTM', actual_test, lstm_prediction,
+                     np.std(actual_validation - lstm_validation_prediction, ddof=1)),
+        build_result('Transformer', actual_test, transformer_prediction,
+                     np.std(actual_validation - transformer_validation_prediction, ddof=1)),
+    ]
     metrics_frame = pd.DataFrame([metrics(result) for result in results])
     metrics_frame.to_csv('forecast_metrics.csv', index=False)
     save_prediction_csv(results, timestamps)

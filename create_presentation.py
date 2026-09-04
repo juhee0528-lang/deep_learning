@@ -184,7 +184,7 @@ slide = prs.slides.add_slide(blank)
 set_bg(slide)
 title(slide, '비교한 세 가지 모델', '05 / models')
 model_data = [
-    ('ARIMA / SARIMAX', '고전 시계열 baseline', '추세와 24시간 계절성\n해석 가능한 기준선', BLUE),
+    ('ARIMA / SARIMAX', '고전 시계열 베이스라인', '추세와 24시간 계절성\n해석 가능한 기준선', BLUE),
     ('LSTM', '순환 신경망', '최근 24시간의\n장기 의존성 학습', ORANGE),
     ('Transformer', 'Self-attention', '시간적 관계와\n다변량 상호작용 학습', CYAN),
 ]
@@ -221,7 +221,7 @@ footer(slide, 7)
 # 8. Uncertainty
 slide = prs.slides.add_slide(blank)
 set_bg(slide)
-title(slide, '예측구간과 불확실성', '07 / uncertainty')
+title(slide, '예측 구간과 불확실성', '07 / uncertainty')
 add_image(slide, 'arima_interval.png', 0.75, 1.55, 3.95, 2.0)
 add_image(slide, 'lstm_interval.png', 4.7, 1.55, 3.95, 2.0)
 add_image(slide, 'transformer_interval.png', 8.65, 1.55, 3.95, 2.0)

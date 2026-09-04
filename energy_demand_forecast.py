@@ -47,10 +47,15 @@ def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
     weather['datetime'] = pd.to_datetime(weather['datetime'])
     weather = weather[['datetime', 'temperature_c', 'rainfall_mm', 'wind_speed_ms',
                        'humidity_pct', 'sunshine_hr', 'solar_radiation_mj_m2']]
+    zero_when_missing = ['rainfall_mm', 'sunshine_hr', 'solar_radiation_mj_m2']
+    weather[zero_when_missing] = weather[zero_when_missing].fillna(0)
+    continuous_weather = ['temperature_c', 'wind_speed_ms', 'humidity_pct']
+    weather[continuous_weather] = weather[continuous_weather].interpolate(
+        limit_direction='both')
     data = power_long.merge(weather, on='datetime', how='inner').sort_values('datetime')
     data = data.drop_duplicates('datetime').set_index('datetime').asfreq('h')
-    numeric_columns = data.columns
-    data[numeric_columns] = data[numeric_columns].interpolate(limit_direction='both')
+    data[continuous_weather] = data[continuous_weather].interpolate(limit_direction='both')
+    data[zero_when_missing] = data[zero_when_missing].fillna(0)
     data[TARGET] = data[TARGET].astype(float)
     data['hour_sin'] = np.sin(2 * np.pi * data.index.hour / 24)
     data['hour_cos'] = np.cos(2 * np.pi * data.index.hour / 24)
@@ -145,10 +150,15 @@ def predict(model, X):
         return model(torch.tensor(X, dtype=torch.float32, device=device)).cpu().numpy()
 
 
-def arima_forecast(train_values, horizon):
+def arima_one_step_forecast(train_values, validation_values, test_values):
     fitted = SARIMAX(train_values, order=(2, 1, 2), seasonal_order=(1, 0, 1, 24),
                      enforce_stationarity=False, enforce_invertibility=False).fit(disp=False)
-    return np.asarray(fitted.forecast(horizon), dtype=float)
+    predictions = []
+    for actual in np.concatenate([validation_values, test_values]):
+        predictions.append(float(np.asarray(fitted.forecast(steps=1))[0]))
+        fitted = fitted.extend([actual])
+    split = len(validation_values)
+    return np.asarray(predictions[:split]), np.asarray(predictions[split:])
 
 
 @dataclass
@@ -251,9 +261,8 @@ def main():
     transformer_validation_prediction = target_scaler.inverse_transform(predict(transformer, X_val).reshape(-1, 1)).ravel()
     lstm_prediction = target_scaler.inverse_transform(predict(lstm, X_test).reshape(-1, 1)).ravel()
     transformer_prediction = target_scaler.inverse_transform(predict(transformer, X_test).reshape(-1, 1)).ravel()
-    arima_all_prediction = arima_forecast(train[TARGET].to_numpy(), len(actual_validation) + len(actual_test))
-    arima_validation_prediction = arima_all_prediction[:len(actual_validation)]
-    arima_prediction = arima_all_prediction[len(actual_validation):]
+    arima_validation_prediction, arima_prediction = arima_one_step_forecast(
+        train[TARGET].to_numpy(), actual_validation, actual_test)
     results = [
         build_result('ARIMA', actual_test, arima_prediction,
                      np.std(actual_validation - arima_validation_prediction, ddof=1)),

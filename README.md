@@ -41,6 +41,8 @@
 
 ```bash
 python energy_demand_forecast.py
+python generate_report.py
+python create_presentation.py
 ```
 
 실행 시 다음 결과 파일이 생성됩니다.
@@ -52,6 +54,10 @@ python energy_demand_forecast.py
 - `arima_interval.png`
 - `lstm_interval.png`
 - `transformer_interval.png`
+- `energy_demand_forecast_report.pdf`
+- `energy_demand_forecast_presentation.pptx`
+
+발표자료는 연구 목적, 7개 지역 데이터, 전처리, 공정한 one-step 평가, 모델 비교, 예측구간, 결과 해석을 10장의 슬라이드로 정리한 파일입니다.
 
 ## 결과 이미지 설명
 

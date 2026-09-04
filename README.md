@@ -9,8 +9,8 @@
 
 ## 데이터
 
-- 데이터 소스: 한전/기상연계 전력수요 데이터
-- 파일: `power_weather_seoul_2025.csv`
+- 데이터 소스: 한국전력거래소 전국 전력수요량 및 서울 ASOS 관측자료
+- 파일: `한국전력거래소_시간별 전국 전력수요량_20251231.csv`, `OBS_ASOS_TIM_20260904095916.csv`
 - 주요 컬럼:
   - `datetime`
   - `power_demand_mwh`
@@ -45,6 +45,7 @@ python energy_demand_forecast.py
 실행 시 다음 결과 파일이 생성됩니다.
 
 - `forecast_metrics.csv`
+- `forecast_predictions.csv`
 - `forecast_comparison.png`
 - `arima_interval.png`
 - `lstm_interval.png`
@@ -57,6 +58,8 @@ python energy_demand_forecast.py
 ![Forecast comparison](forecast_comparison.png)
 
 `forecast_comparison.png`는 테스트 구간의 처음 200개 시점을 대상으로 실제 전력수요와 각 모델의 예측값을 비교한 이미지입니다. 위쪽 그래프에서는 시간에 따른 수요 변화와 예측선의 추세를 확인할 수 있고, 아래쪽 막대그래프에서는 MAE와 RMSE를 모델별로 비교할 수 있습니다. 이번 실행에서는 Transformer의 RMSE가 가장 낮았고, ARIMA가 Transformer와 비슷한 수준의 오차를 보였습니다. LSTM은 예측선이 실제 변동을 충분히 따라가지 못해 가장 큰 오차가 나타났습니다.
+
+최종 실행에서는 모든 모델이 동일한 시간순 학습·검증·평가 구간을 사용했습니다. 총 8,760시간을 학습 6,132시간(70%), 검증 1,314시간(15%), 평가 1,314시간(15%)으로 나누었습니다.
 
 ### 2. ARIMA 예측 구간
 
@@ -78,7 +81,7 @@ python energy_demand_forecast.py
 
 ### 결과 해석 시 주의점
 
-현재 95% 예측 구간은 예측 잔차의 분산을 이용한 근사값이며, 엄밀한 확률 예측 구간은 아닙니다. 또한 딥러닝 모델의 예측선이 일정하게 나타나는 현상은 성능 지표와 그래프를 함께 해석해야 하는 이유를 보여줍니다. 향후에는 학습 epoch와 입력 시퀀스 조정, 역스케일링 검증, 계절성 feature 개선, quantile loss 또는 Monte Carlo dropout을 이용한 불확실성 추정을 적용할 수 있습니다.
+현재 95% 예측 구간은 예측 잔차의 분산을 이용한 근사값이며, 엄밀한 확률 예측 구간은 아닙니다. `forecast_metrics.csv`에는 MAE, RMSE, MAPE와 함께 실제값 표준편차, 예측값 표준편차, 표준편차 비율, 95% 구간 포함률이 저장됩니다. 최종 실행에서 LSTM과 Transformer의 표준편차 비율은 각각 약 0.961과 0.963으로 나타나 예측값이 하나의 일정한 값으로 붕괴하지 않았음을 확인했습니다. 향후에는 quantile loss 또는 Monte Carlo dropout을 이용한 불확실성 추정을 적용할 수 있습니다.
 
 ## 해석 포인트
 

@@ -16,10 +16,10 @@ from torch.utils.data import DataLoader, TensorDataset
 
 
 POWER_PATH = '한국전력거래소_시간별 전국 전력수요량_20251231.csv'
-WEATHER_PATH = 'OBS_ASOS_TIM_20260904095916.csv'
+WEATHER_PATH = 'OBS_ASOS_TIM_20260904122533.csv'
 LOOKBACK = 24
 TARGET = 'power_demand_mwh'
-GRAPH_TITLE = 'National Power Demand and Seoul Temperature in 2025'
+GRAPH_TITLE = 'National Power Demand and Regional Weather in 2025'
 
 
 def mape(actual, predicted):
@@ -45,17 +45,33 @@ def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
         '일조(hr)': 'sunshine_hr', '일사(MJ/m2)': 'solar_radiation_mj_m2'
     })
     weather['datetime'] = pd.to_datetime(weather['datetime'])
-    weather = weather[['datetime', 'temperature_c', 'rainfall_mm', 'wind_speed_ms',
+    weather = weather[['지점명', 'datetime', 'temperature_c', 'rainfall_mm', 'wind_speed_ms',
                        'humidity_pct', 'sunshine_hr', 'solar_radiation_mj_m2']]
     zero_when_missing = ['rainfall_mm', 'sunshine_hr', 'solar_radiation_mj_m2']
     weather[zero_when_missing] = weather[zero_when_missing].fillna(0)
     continuous_weather = ['temperature_c', 'wind_speed_ms', 'humidity_pct']
-    weather[continuous_weather] = weather[continuous_weather].interpolate(
-        limit_direction='both')
-    data = power_long.merge(weather, on='datetime', how='inner').sort_values('datetime')
+    weather[continuous_weather] = weather.groupby('지점명')[continuous_weather].transform(
+        lambda values: values.interpolate(limit_direction='both'))
+    regional_frames = []
+    for region, region_frame in weather.groupby('지점명'):
+        region_frame = region_frame.drop(columns='지점명').set_index('datetime')
+        region_frame = region_frame[~region_frame.index.duplicated(keep='first')]
+        region_frame = region_frame.reindex(pd.date_range('2025-01-01 01:00', periods=8760, freq='h'))
+        region_frame[continuous_weather] = region_frame[continuous_weather].interpolate(limit_direction='both')
+        region_frame[zero_when_missing] = region_frame[zero_when_missing].fillna(0)
+        region_frame.columns = [f'{region}_{column}' for column in region_frame.columns]
+        regional_frames.append(region_frame)
+    regional_weather = pd.concat(regional_frames, axis=1).reset_index(names='datetime')
+    data = power_long.merge(regional_weather, on='datetime', how='inner').sort_values('datetime')
     data = data.drop_duplicates('datetime').set_index('datetime').asfreq('h')
-    data[continuous_weather] = data[continuous_weather].interpolate(limit_direction='both')
-    data[zero_when_missing] = data[zero_when_missing].fillna(0)
+    regional_continuous = [column for column in data.columns
+                           if any(column.endswith(f'_{weather_column}')
+                                  for weather_column in continuous_weather)]
+    regional_zero = [column for column in data.columns
+                     if any(column.endswith(f'_{weather_column}')
+                            for weather_column in zero_when_missing)]
+    data[regional_continuous] = data[regional_continuous].interpolate(limit_direction='both')
+    data[regional_zero] = data[regional_zero].fillna(0)
     data[TARGET] = data[TARGET].astype(float)
     data['hour_sin'] = np.sin(2 * np.pi * data.index.hour / 24)
     data['hour_cos'] = np.cos(2 * np.pi * data.index.hour / 24)
@@ -67,10 +83,12 @@ def load_data(power_path=POWER_PATH, weather_path=WEATHER_PATH):
     return data.reset_index()
 
 
-def feature_columns():
-    return ['temperature_c', 'rainfall_mm', 'wind_speed_ms', 'humidity_pct',
-            'sunshine_hr', 'solar_radiation_mj_m2', 'hour_sin', 'hour_cos',
-            'day_sin', 'day_cos', 'month_sin', 'month_cos', 'is_weekend', TARGET]
+def feature_columns(data):
+    time_columns = ['hour_sin', 'hour_cos', 'day_sin', 'day_cos', 'month_sin', 'month_cos',
+                    'is_weekend']
+    weather_columns = [column for column in data.columns
+                       if column not in {'datetime', TARGET} and column not in time_columns]
+    return weather_columns + time_columns + [TARGET]
 
 
 def split_by_time(data):
@@ -80,7 +98,7 @@ def split_by_time(data):
 
 
 def make_sequences(data, scaler, target_scaler, start_index, end_index):
-    values = scaler.transform(data[feature_columns()])
+    values = scaler.transform(data[feature_columns(data)])
     targets = target_scaler.transform(data[[TARGET]]).ravel()
     X, y, timestamps = [], [], []
     for index in range(max(LOOKBACK, start_index), end_index):
@@ -210,16 +228,12 @@ def save_graphs(data, results):
     axes[0].plot(dates, results[0].actual[:200], label='Actual national demand', linewidth=2)
     for result in results:
         axes[0].plot(dates, result.predicted[:200], label=f'{result.model} prediction', linewidth=1.5)
-    temperature_axis = axes[0].twinx()
-    temperature_axis.plot(dates, data['temperature_c'].iloc[test_start:test_start + 200],
-                           color='tab:orange', linestyle='--', label='Seoul temperature', linewidth=1.5)
     axes[0].set_title(GRAPH_TITLE)
     axes[0].set_xlabel('Datetime')
     axes[0].set_ylabel('Power demand (MWh)')
     axes[0].tick_params(axis='x', rotation=20)
     demand_handles, demand_labels = axes[0].get_legend_handles_labels()
-    temperature_handles, temperature_labels = temperature_axis.get_legend_handles_labels()
-    axes[0].legend(demand_handles + temperature_handles, demand_labels + temperature_labels)
+    axes[0].legend(demand_handles, demand_labels)
     metric_frame = pd.DataFrame([metrics(result) for result in results])
     sns.barplot(data=metric_frame.melt(id_vars='model', value_vars=['MAE', 'RMSE']),
                 x='model', y='value', hue='variable', ax=axes[1])
@@ -248,7 +262,7 @@ def main():
     data = load_data()
     train, validation, test = split_by_time(data)
     train_end, val_end = len(train), len(train) + len(validation)
-    input_scaler = StandardScaler().fit(train[feature_columns()])
+    input_scaler = StandardScaler().fit(train[feature_columns(data)])
     target_scaler = StandardScaler().fit(train[[TARGET]])
     X_train, y_train, _ = make_sequences(data, input_scaler, target_scaler, 0, train_end)
     X_val, y_val, _ = make_sequences(data, input_scaler, target_scaler, train_end, val_end)

@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 import pandas as pd
 from pptx import Presentation
 from pptx.dml.color import RGBColor
@@ -25,6 +28,30 @@ prs.slide_width = Inches(13.333)
 prs.slide_height = Inches(7.5)
 blank = prs.slide_layouts[6]
 metrics = pd.read_csv(ROOT / 'forecast_metrics.csv')
+
+
+def make_eda_plot():
+    data = pd.read_csv(ROOT / 'national_power_regional_weather_2025.csv', parse_dates=['datetime'])
+    plt.rcParams['font.family'] = 'Apple SD Gothic Neo'
+    plt.rcParams['axes.unicode_minus'] = False
+    figure, axes = plt.subplots(1, 2, figsize=(14, 4.5))
+    hourly = data.assign(hour=data['datetime'].dt.hour).groupby('hour')['power_demand_mwh'].mean()
+    axes[0].plot(hourly.index, hourly.values, color='#205B89', linewidth=2.5, marker='o', markersize=3)
+    axes[0].set_title('Average national demand by hour')
+    axes[0].set_xlabel('Hour')
+    axes[0].set_ylabel('Power demand (MWh)')
+    temperature_columns = [column for column in data.columns if column.endswith('_temperature_c')]
+    regional_means = data[temperature_columns].mean().sort_values()
+    axes[1].barh([column.replace('_temperature_c', '') for column in regional_means.index],
+                 regional_means.values, color='#F09746')
+    axes[1].set_title('Mean temperature by region')
+    axes[1].set_xlabel('Temperature (C)')
+    figure.tight_layout()
+    figure.savefig(ROOT / 'eda_overview.png', dpi=180)
+    plt.close(figure)
+
+
+make_eda_plot()
 
 
 def set_bg(slide, color=WHITE):
@@ -137,7 +164,16 @@ text(slide, 'national_power_regional_weather_2025.csv', 0.9, 6.25, 6.5, 0.35, 14
 text(slide, '전처리된 전력수요·지역 날씨를 하나의 CSV로 저장해 재현성을 높였습니다.', 0.9, 6.62, 8.5, 0.25, 11, MID)
 footer(slide, 3)
 
-# 4. Preprocessing
+# 4. EDA
+slide = prs.slides.add_slide(blank)
+set_bg(slide)
+title(slide, 'EDA: 시간대와 지역별 기온의 특징', '03 / eda')
+add_image(slide, 'eda_overview.png', 0.85, 1.55, 11.7, 3.75)
+text(slide, '시간대별 평균 수요는 뚜렷한 일중 패턴을 보입니다. 지역별 평균 기온은 지역마다 차이가 있어 전국 수요를 설명하는 다변량 입력으로 사용할 가치가 있습니다.', 0.95, 5.55, 11.0, 0.65, 15, NAVY, True)
+text(slide, 'EDA는 모델 선택과 입력 변수 설계의 근거로 사용했습니다.', 0.95, 6.35, 8.5, 0.3, 13, MID)
+footer(slide, 4)
+
+# 5. Preprocessing
 slide = prs.slides.add_slide(blank)
 set_bg(slide, WHITE)
 title(slide, '전처리와 데이터 누출 방지', '03 / preprocessing')
@@ -156,9 +192,9 @@ for i, (num, head, body) in enumerate(steps):
     if i < 3:
         text(slide, '→', x + 2.62, 3.1, 0.35, 0.4, 22, ORANGE, True, PP_ALIGN.CENTER)
 text(slide, '결측을 무조건 보간하지 않고 변수의 물리적 의미에 맞춰 처리했습니다.', 0.9, 6.05, 8.8, 0.4, 15, NAVY, True)
-footer(slide, 4)
+footer(slide, 5)
 
-# 5. Fair evaluation
+# 6. Fair evaluation
 slide = prs.slides.add_slide(blank)
 set_bg(slide, NAVY)
 title(slide, '공정한 시험: 모두 다음 1시간 예측', '04 / evaluation', WHITE)
@@ -177,9 +213,9 @@ text(slide, '최근 24시간 실제 자료 → 다음 1시간', 1.0, 4.7, 4.2, 0
 text(slide, 'ARIMA', 6.2, 4.25, 2.2, 0.35, 15, WHITE, True)
 text(slide, '1시간 예측 → 실제값 반영 → 다음 1시간', 6.2, 4.7, 5.5, 0.35, 13, RGBColor(203, 220, 228))
 text(slide, 'ARIMA만 수개월을 한 번에 예측하는 조건을 제거했습니다.', 1.0, 5.9, 8.4, 0.38, 17, CYAN, True)
-footer(slide, 5)
+footer(slide, 6)
 
-# 6. Models
+# 7. Models
 slide = prs.slides.add_slide(blank)
 set_bg(slide)
 title(slide, '비교한 세 가지 모델', '05 / models')
@@ -196,9 +232,21 @@ for i, (head, sub, body, accent) in enumerate(model_data):
     text(slide, sub, x + 0.28, 2.85, 3.0, 0.3, 11, accent, True)
     text(slide, body, x + 0.28, 3.55, 2.8, 0.75, 16, DARK)
 text(slide, '공통 입력: 지역 날씨 + 시간 특성 + 과거 전력수요', 1.0, 6.2, 8.5, 0.35, 16, NAVY, True)
-footer(slide, 6)
+footer(slide, 7)
 
-# 7. Results
+# 8. Training and metrics
+slide = prs.slides.add_slide(blank)
+set_bg(slide, WHITE)
+title(slide, '학습 설정과 평가 지표', '06 / training')
+rect(slide, 0.85, 1.75, 5.5, 4.35, PALE, PALE, True)
+text(slide, '학습 설정', 1.2, 2.1, 3.5, 0.35, 18, NAVY, True)
+bullet_list(slide, ['손실 함수: MSELoss', 'Optimizer: Adam, learning rate 0.001', 'LSTM: hidden size 64, 2 layers', 'Transformer: d_model 64, 4 heads, 2 layers', 'lookback: 최근 24시간'], 1.2, 2.8, 4.6, 14, DARK, 0.58)
+rect(slide, 6.8, 1.75, 5.55, 4.35, NAVY, NAVY, True)
+text(slide, '평가 지표', 7.2, 2.1, 3.5, 0.35, 18, WHITE, True)
+bullet_list(slide, ['MAE: 평균 절대오차', 'RMSE: 큰 오차에 더 민감', 'MAPE: 상대 오차 비율', '표준편차 비율: 상수 예측 붕괴 확인', '95% coverage: 구간 안 실제값 비율'], 7.2, 2.8, 4.6, 14, RGBColor(220, 235, 241), 0.58)
+footer(slide, 8)
+
+# 9. Results
 slide = prs.slides.add_slide(blank)
 set_bg(slide, WHITE)
 title(slide, '성능 비교 결과', '06 / results')
@@ -216,9 +264,9 @@ for i, row in enumerate(rows):
 text(slide, '표준편차 비율이 0에 가깝지 않아 LSTM·Transformer의 상수 예측 붕괴는 관찰되지 않았습니다.', 0.95, 4.55, 11.2, 0.5, 16, NAVY, True)
 add_image(slide, 'forecast_comparison.png', 0.95, 5.1, 5.75, 1.85)
 text(slide, '그래프와 수치를 함께 읽어야 모델의 실제 성능을 판단할 수 있습니다.', 7.1, 5.45, 4.6, 0.75, 16, DARK, True)
-footer(slide, 7)
+footer(slide, 9)
 
-# 8. Uncertainty
+# 10. Uncertainty
 slide = prs.slides.add_slide(blank)
 set_bg(slide)
 title(slide, '예측 구간과 불확실성', '07 / uncertainty')
@@ -229,9 +277,9 @@ text(slide, 'ARIMA', 2.1, 3.7, 1.3, 0.25, 11, BLUE, True, PP_ALIGN.CENTER)
 text(slide, 'LSTM', 6.1, 3.7, 1.3, 0.25, 11, ORANGE, True, PP_ALIGN.CENTER)
 text(slide, 'Transformer', 9.9, 3.7, 1.5, 0.25, 11, CYAN, True, PP_ALIGN.CENTER)
 bullet_list(slide, ['95% 구간 폭은 검증 잔차 표준편차로 계산', '평가 정답을 구간 계산에 사용하지 않아 누출 방지', '포함률은 실제값이 구간 안에 들어간 비율', '현재 구간은 잔차 기반 근사이며 확률 보장은 아님'], 1.0, 4.45, 11.0, 15, DARK, 0.48)
-footer(slide, 8)
+footer(slide, 10)
 
-# 9. Interpretation
+# 11. Interpretation
 slide = prs.slides.add_slide(blank)
 set_bg(slide, PALE)
 title(slide, '결과 해석', '08 / interpretation')
@@ -241,16 +289,16 @@ bullet_list(slide, ['7개 지역 날씨를 전국 수요 예측에 함께 사용
 rect(slide, 6.9, 1.7, 5.55, 4.5, NAVY, NAVY, True)
 text(slide, '남은 한계와 다음 단계', 7.3, 2.05, 4.5, 0.35, 17, WHITE, True)
 bullet_list(slide, ['ARIMA의 수렴과 차수 최적화', 'quantile loss 기반 예측구간', 'conformal prediction으로 coverage 보정', '더 긴 기간과 다른 연도 데이터 검증'], 7.3, 2.75, 4.55, 14, RGBColor(220, 235, 241), 0.63)
-footer(slide, 9)
+footer(slide, 11)
 
-# 10. Closing
+# 12. Closing
 slide = prs.slides.add_slide(blank)
 set_bg(slide, NAVY)
 text(slide, 'THANK YOU', 0.85, 1.0, 4.2, 0.4, 13, CYAN, True)
 text(slide, '전력수요 예측은\n정확도만의 문제가 아니다.', 0.85, 2.0, 7.4, 1.25, 32, WHITE, True)
 text(slide, '공정한 시험 조건, 지역 기상 정보,\n그리고 예측의 불확실성까지 함께 보아야 한다.', 0.9, 4.05, 7.5, 0.8, 18, RGBColor(213, 229, 236))
 text(slide, '전국 전력수요 시계열 예측  /  주희', 0.9, 6.25, 6.0, 0.3, 12, CYAN, True)
-footer(slide, 10)
+footer(slide, 12)
 
 prs.save(OUTPUT)
 print(OUTPUT)

@@ -50,6 +50,7 @@ python create_presentation.py
 - `national_power_regional_weather_2025.csv`
 - `forecast_metrics.csv`
 - `forecast_predictions.csv`
+- `eda_overview.png`
 - `forecast_comparison.png`
 - `arima_interval.png`
 - `lstm_interval.png`
@@ -57,7 +58,7 @@ python create_presentation.py
 - `energy_demand_forecast_report.pdf`
 - `energy_demand_forecast_presentation.pptx`
 
-발표자료는 연구 목적, 7개 지역 데이터, 전처리, 공정한 one-step 평가, 모델 비교, 예측구간, 결과 해석을 10장의 슬라이드로 정리한 파일입니다.
+발표자료는 연구 목적, 7개 지역 데이터, EDA, 전처리, 공정한 one-step 평가, 모델 비교, 학습 설정, 예측 구간, 결과 해석을 12장의 슬라이드로 정리한 파일입니다.
 
 ## 결과 이미지 설명
 

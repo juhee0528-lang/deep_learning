@@ -260,6 +260,7 @@ def save_graphs(data, results):
 def main():
     torch.manual_seed(42)
     data = load_data()
+    data.to_csv('national_power_regional_weather_2025.csv', index=False)
     train, validation, test = split_by_time(data)
     train_end, val_end = len(train), len(train) + len(validation)
     input_scaler = StandardScaler().fit(train[feature_columns(data)])
@@ -291,7 +292,7 @@ def main():
     save_graphs(data, results)
     print(metrics_frame.to_string(index=False))
     print(f'Rows: total={len(data)}, train={len(train)}, validation={len(validation)}, test={len(test)}')
-    print('Saved: forecast_metrics.csv, forecast_predictions.csv, forecast_comparison.png, *_interval.png')
+    print('Saved: national_power_regional_weather_2025.csv, forecast_metrics.csv, forecast_predictions.csv, forecast_comparison.png, *_interval.png')
 
 
 if __name__ == '__main__':

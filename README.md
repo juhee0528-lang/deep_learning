@@ -11,6 +11,7 @@
 
 - 데이터 소스: 한국전력거래소 전국 전력수요량 및 7개 지역 ASOS 관측자료
 - 파일: `한국전력거래소_시간별 전국 전력수요량_20251231.csv`, `OBS_ASOS_TIM_20260904122533.csv`
+- 통합 파일: `national_power_regional_weather_2025.csv`
 - 주요 컬럼:
   - `datetime`
   - `power_demand_mwh`
@@ -44,6 +45,7 @@ python energy_demand_forecast.py
 
 실행 시 다음 결과 파일이 생성됩니다.
 
+- `national_power_regional_weather_2025.csv`
 - `forecast_metrics.csv`
 - `forecast_predictions.csv`
 - `forecast_comparison.png`
@@ -58,6 +60,8 @@ python energy_demand_forecast.py
 ![Forecast comparison](forecast_comparison.png)
 
 `forecast_comparison.png`는 테스트 구간의 처음 200개 시점을 대상으로 전국 전력수요와 세 모델의 예측값을 비교한 이미지입니다. 아래쪽 막대그래프에서는 MAE와 RMSE를 모델별로 비교합니다. 모델 입력에는 서울·인천·대전·대구·광주·부산·제주의 기상 변수가 모두 포함됩니다. 세 모델 모두 매 시간 직전까지의 실제 전력수요를 사용해 다음 한 시간을 예측하는 동일한 walk-forward 방식으로 평가합니다.
+
+`national_power_regional_weather_2025.csv`는 전력수요와 7개 지역 날씨를 하나의 시간 기준으로 합친 파일입니다. 원자료를 여러 개 열지 않고도 통합 데이터만 확인하거나 후속 분석에 사용할 수 있습니다.
 
 최종 실행에서는 모든 모델이 동일한 시간순 학습·검증·평가 구간을 사용했습니다. 총 8,760시간을 학습 6,132시간(70%), 검증 1,314시간(15%), 평가 1,314시간(15%)으로 나누었습니다.
 

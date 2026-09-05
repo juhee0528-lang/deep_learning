@@ -1,0 +1,43 @@
+﻿city,variable,observed_missing,absent_rows,total_missing,rule
+광주,temperature_c,0,1,1,forward fill only
+광주,rainfall_mm,7709,1,7710,observed-row blank: assumed zero; absent row: forward fill
+광주,wind_speed_ms,9,1,10,forward fill only
+광주,humidity_pct,0,1,1,forward fill only
+광주,sunshine_hr,3998,1,3999,observed-row blank: assumed zero; absent row: forward fill
+광주,solar_radiation_mj_m2,3998,1,3999,observed-row blank: assumed zero; absent row: forward fill
+대구,temperature_c,0,0,0,forward fill only
+대구,rainfall_mm,7918,0,7918,observed-row blank: assumed zero; absent row: forward fill
+대구,wind_speed_ms,0,0,0,forward fill only
+대구,humidity_pct,0,0,0,forward fill only
+대구,sunshine_hr,3971,0,3971,observed-row blank: assumed zero; absent row: forward fill
+대구,solar_radiation_mj_m2,3971,0,3971,observed-row blank: assumed zero; absent row: forward fill
+대전,temperature_c,0,0,0,forward fill only
+대전,rainfall_mm,7681,0,7681,observed-row blank: assumed zero; absent row: forward fill
+대전,wind_speed_ms,0,0,0,forward fill only
+대전,humidity_pct,0,0,0,forward fill only
+대전,sunshine_hr,3970,0,3970,observed-row blank: assumed zero; absent row: forward fill
+대전,solar_radiation_mj_m2,4019,0,4019,observed-row blank: assumed zero; absent row: forward fill
+부산,temperature_c,0,0,0,forward fill only
+부산,rainfall_mm,7958,0,7958,observed-row blank: assumed zero; absent row: forward fill
+부산,wind_speed_ms,10,0,10,forward fill only
+부산,humidity_pct,0,0,0,forward fill only
+부산,sunshine_hr,3977,0,3977,observed-row blank: assumed zero; absent row: forward fill
+부산,solar_radiation_mj_m2,3977,0,3977,observed-row blank: assumed zero; absent row: forward fill
+서울,temperature_c,0,0,0,forward fill only
+서울,rainfall_mm,7609,0,7609,observed-row blank: assumed zero; absent row: forward fill
+서울,wind_speed_ms,0,0,0,forward fill only
+서울,humidity_pct,0,0,0,forward fill only
+서울,sunshine_hr,3978,0,3978,observed-row blank: assumed zero; absent row: forward fill
+서울,solar_radiation_mj_m2,3978,0,3978,observed-row blank: assumed zero; absent row: forward fill
+인천,temperature_c,0,0,0,forward fill only
+인천,rainfall_mm,7730,0,7730,observed-row blank: assumed zero; absent row: forward fill
+인천,wind_speed_ms,0,0,0,forward fill only
+인천,humidity_pct,0,0,0,forward fill only
+인천,sunshine_hr,3965,0,3965,observed-row blank: assumed zero; absent row: forward fill
+인천,solar_radiation_mj_m2,3965,0,3965,observed-row blank: assumed zero; absent row: forward fill
+제주,temperature_c,0,0,0,forward fill only
+제주,rainfall_mm,7686,0,7686,observed-row blank: assumed zero; absent row: forward fill
+제주,wind_speed_ms,0,0,0,forward fill only
+제주,humidity_pct,0,0,0,forward fill only
+제주,sunshine_hr,3964,0,3964,observed-row blank: assumed zero; absent row: forward fill
+제주,solar_radiation_mj_m2,3966,0,3966,observed-row blank: assumed zero; absent row: forward fill

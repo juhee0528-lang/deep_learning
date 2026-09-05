@@ -1,0 +1,13 @@
+{
+  "training_rows": 6132,
+  "peak_mean_hour": 20,
+  "minimum_mean_hour": 4,
+  "weekday_mean": 67754.53313595992,
+  "weekend_mean": 59450.78977599081,
+  "acf_1": 0.973216245146826,
+  "acf_24": 0.8027386030246418,
+  "acf_168": 0.8204586848389716,
+  "temperature_pearson": 0.18438637598545188,
+  "iqr_outlier_candidates": 8,
+  "outlier_policy": "retain physical peaks; flag only, no automatic removal"
+}

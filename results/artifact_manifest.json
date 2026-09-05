@@ -1,0 +1,246 @@
+{
+  "EDA.ipynb": {
+    "bytes": 925137,
+    "sha256": "2a234b3643dc64cec25bcf409d7989856f39d80ca6a4dd2ee458fb535b3ff29b"
+  },
+  "README.md": {
+    "bytes": 4942,
+    "sha256": "43fbb4152ce5594151822cf48354b6f005bcb4df5b6e009b2d481af3d21cb0c5"
+  },
+  "REPORT.md": {
+    "bytes": 11872,
+    "sha256": "4473a6b10f2677eee0c3e62de49766e1cbbcfb0a5511cddf24b968a4501323e1"
+  },
+  "data/processed/calibration.csv": {
+    "bytes": 177644,
+    "sha256": "4add4f940fdb759f532809025a65574c1bbee4ddf835cf3704b40e506cc28c36"
+  },
+  "data/processed/hourly_data.csv": {
+    "bytes": 3529221,
+    "sha256": "c44e2cbb2e8ea5b413fdec5f06468feb9c6b072d61124aa8cc2d966b6f9bb137"
+  },
+  "data/processed/test.csv": {
+    "bytes": 534525,
+    "sha256": "6289b34d12c571d9ad710325962b041340c3a32a91a5e8e3b90f5e543d059d97"
+  },
+  "data/processed/train.csv": {
+    "bytes": 2466775,
+    "sha256": "f6d7f23dd0f8438ef06f7b96ff283708907afb389ede0f49f3391e310a9d95a8"
+  },
+  "data/processed/validation.csv": {
+    "bytes": 356985,
+    "sha256": "beac8f020bb19f7b5b489439a1c38479ffbc4b2efe3be26ac82a1b37c6870a28"
+  },
+  "data/raw/OBS_ASOS_TIM_20260904122533.csv": {
+    "bytes": 2812584,
+    "sha256": "a3d22e32bd7603565b9a4ca9b1e2f7dc367bccae02cc92d2aada7a954c9170f4"
+  },
+  "data/raw/한국전력거래소_시간별 전국 전력수요량_20251231.csv": {
+    "bytes": 57109,
+    "sha256": "53c15985950b81d897f17848a8c127c55ed3b0572020c4f921c849b25a8b5176"
+  },
+  "figures/01_coverage.png": {
+    "bytes": 254911,
+    "sha256": "acb951ce30ca7d4838349bba3d52fde01f2a6c08a433683479538eb59c5f9e68"
+  },
+  "figures/02_patterns.png": {
+    "bytes": 84910,
+    "sha256": "0b4c05adebe0b2a052f1832901313dddc2d741a914a08b1afdfbd680d3223c2b"
+  },
+  "figures/03_temperature.png": {
+    "bytes": 266731,
+    "sha256": "6e35bb5e9c92850648584fa7abf99d355db9c0b1f77527df6299102652333d48"
+  },
+  "figures/04_autocorrelation.png": {
+    "bytes": 77068,
+    "sha256": "48ce0449aa880e4d33e2e3eb1199025177fca5e8925e2a7a3d39aeea7832e7fb"
+  },
+  "figures/05_predictions.png": {
+    "bytes": 210510,
+    "sha256": "3e68f35559305b189e3715092face85d7e3919eeb96cfda382f2a62adc780c10"
+  },
+  "figures/06_metrics.png": {
+    "bytes": 40748,
+    "sha256": "65320a1250142a0f06028030c886d6a1f49f738d24a7e836a915efcc1d03303f"
+  },
+  "figures/07_learning.png": {
+    "bytes": 102287,
+    "sha256": "19db33a213f7da5cb2f765044a723ecb5136dec1d82f8eb565ce9e980daf5ab0"
+  },
+  "figures/08_interval.png": {
+    "bytes": 211082,
+    "sha256": "dcff9077de182f327357f3315442a4551c3ff4878d84471fee3651d8ba0db20a"
+  },
+  "models/LSTM_calendar_seed123.pt": {
+    "bytes": 27085,
+    "sha256": "15e70a315610eeaa22406a73e3222941630c1c39632eaae904c6b5b05b577c10"
+  },
+  "models/LSTM_calendar_seed42.pt": {
+    "bytes": 27085,
+    "sha256": "98d08eab98acfa6498f486832eee96662b0237d4bbe9f46488a60f536ca42ffb"
+  },
+  "models/LSTM_calendar_seed7.pt": {
+    "bytes": 27085,
+    "sha256": "776dbebfda88f5971af8286d6c0365313b81c48c3409a76cb91aaa4fed0eeb76"
+  },
+  "models/LSTM_weather_seed123.pt": {
+    "bytes": 74253,
+    "sha256": "cb0292349c67f2fb5f83f01ede37bfec419cdf5d5e43d53fefc92924b01653f0"
+  },
+  "models/LSTM_weather_seed42.pt": {
+    "bytes": 74253,
+    "sha256": "863ef5c536ff46f015c2c4e8469e8ea8cc1b58527b7a549ba333ba4fe825b9ec"
+  },
+  "models/LSTM_weather_seed7.pt": {
+    "bytes": 74253,
+    "sha256": "b2516f2a8c1e393d084de0995691ada8c4d551aafcd5dd4c8fc58ad940e1732c"
+  },
+  "models/Transformer_weather_seed123.pt": {
+    "bytes": 61866,
+    "sha256": "da928e52a7ad4160036525578ff1523f84cc17fbd1fd829a4172b329b627aba3"
+  },
+  "models/Transformer_weather_seed42.pt": {
+    "bytes": 61866,
+    "sha256": "6d279ef2dad15281240cdf23b8039b5cdee8ac21fd72a243d47ad23d38217f64"
+  },
+  "models/Transformer_weather_seed7.pt": {
+    "bytes": 61866,
+    "sha256": "5b4cb211e62b895d8c19e9aa80cb20ee59686d38c3c9dd686b18d82f2529fab1"
+  },
+  "models/sarima_parameters.json": {
+    "bytes": 488,
+    "sha256": "de5155397c99f934d3a2a3cbbf83553b9aa0b7c85275d562b44ba33a29352761"
+  },
+  "presentation/발표노트.md": {
+    "bytes": 7406,
+    "sha256": "52ad349fee638e713d4021f465f8adad899be81965b393b5f284409cf94c7cf1"
+  },
+  "presentation/전력수요_발표자료.pdf": {
+    "bytes": 1948555,
+    "sha256": "041cfd9f7e35254ce6a42af6e583e787060fe6bf890a5d545d9ccb233f25f228"
+  },
+  "presentation/전력수요_발표자료.pptx": {
+    "bytes": 1053390,
+    "sha256": "129539ba1ed5fa137be2b7f5acd8b7e98d9f525ac799bcce72794c982f4f9c67"
+  },
+  "requirements.txt": {
+    "bytes": 128,
+    "sha256": "a3fbac8390128549de5da76442e69839bc261d60fee0ee5ca743715f5ec011e4"
+  },
+  "results/all_predictions.csv": {
+    "bytes": 1260247,
+    "sha256": "3e2cfbf59fb0915c75a163582e9b3687e98134118491f070e3d0ad81338d232f"
+  },
+  "results/data_audit.json": {
+    "bytes": 998,
+    "sha256": "3d801fda8cdce1e1ce1b3954faef2f871a46c6cc08c30a3e8c8590311fdce225"
+  },
+  "results/eda_autocorrelation.csv": {
+    "bytes": 3844,
+    "sha256": "d72bd88536821c77b4555597a97487a116d20d016516526085e4518cceab3411"
+  },
+  "results/eda_descriptive.csv": {
+    "bytes": 8219,
+    "sha256": "df3dbb2cd869ead725ad58e298322682adbb5127b702016bfca904761d477979"
+  },
+  "results/eda_hourly.csv": {
+    "bytes": 892,
+    "sha256": "9eb536cd8f462e81fca2b42e3abd1aa748967739a89210f40b437aadecff8092"
+  },
+  "results/eda_monthly.csv": {
+    "bytes": 199,
+    "sha256": "7863a6dc0229d70848c9c821747bc8123e9f3a87af5b548d691e9a741215c984"
+  },
+  "results/eda_outlier_candidates.csv": {
+    "bytes": 250,
+    "sha256": "0392ec78ad6840036e6daa26db3c60880f00b454671486971e727ecd952b84a8"
+  },
+  "results/eda_summary.json": {
+    "bytes": 401,
+    "sha256": "3499d161331275e5813eb0e9f830fc78a79da0036c78323ab66e6cf221096ab2"
+  },
+  "results/eda_weekday.csv": {
+    "bytes": 286,
+    "sha256": "7014536e0fc401644312df640a3cd7abb663e648f0d27230f1a942c6c09c133e"
+  },
+  "results/experiment_config.json": {
+    "bytes": 549,
+    "sha256": "39fffe5eab2185c47dd6f4199a2e65a269e3fdd7bb3d6279c1e790f8729dc36a"
+  },
+  "results/history_LSTM_calendar_seed123.csv": {
+    "bytes": 1108,
+    "sha256": "2744bb4ef75f23a4c2697f668f41f7981e5ca8d037416b5f17872e6350a643c6"
+  },
+  "results/history_LSTM_calendar_seed42.csv": {
+    "bytes": 1021,
+    "sha256": "518b9dbe9575a6012506d434048a0291ee5031d7501f7f40056566151aebf92e"
+  },
+  "results/history_LSTM_calendar_seed7.csv": {
+    "bytes": 1378,
+    "sha256": "9f658aa55e140c1fa112b9db3b6764e74d332c8094d7b0f98360562745d9319e"
+  },
+  "results/history_LSTM_weather_seed123.csv": {
+    "bytes": 1383,
+    "sha256": "03d0d135245c74b933da82da4899f9e3cf901d7f5e6f4769f419cd6b1a8df5eb"
+  },
+  "results/history_LSTM_weather_seed42.csv": {
+    "bytes": 1383,
+    "sha256": "95b9f7650cee89d5304a14d95b7a04d17699acd298534a453c8e4278b3c7382a"
+  },
+  "results/history_LSTM_weather_seed7.csv": {
+    "bytes": 1213,
+    "sha256": "46e326e11ee227ed7b1e1581db5e2cc27ce17a2416064c44d38d419ad6c488d6"
+  },
+  "results/history_Transformer_weather_seed123.csv": {
+    "bytes": 1335,
+    "sha256": "4bcd024521bf32e28bb493159eb2aace10ef51bd6cc9859056544630553e7e6c"
+  },
+  "results/history_Transformer_weather_seed42.csv": {
+    "bytes": 1382,
+    "sha256": "cc64c4c7c374f1866a0107e82b75f2deafe807fe41078a9c6424cb5b9476be1d"
+  },
+  "results/history_Transformer_weather_seed7.csv": {
+    "bytes": 1158,
+    "sha256": "733db7cb88246834568739f1615ce476324e53d1990378424f6ce38aab031489"
+  },
+  "results/metrics.csv": {
+    "bytes": 885,
+    "sha256": "0cc71ee1c35e8b2cc54809e9aeab67a0d416349de03089f94ecd49cb50050347"
+  },
+  "results/missing_audit.csv": {
+    "bytes": 2966,
+    "sha256": "f1fea6573c50c1fc7c6772e06a5698f2699a7915c08e18cc91999586c8360ef5"
+  },
+  "results/sarima_fit.json": {
+    "bytes": 396,
+    "sha256": "1b52ece0d7987bb4b2d558c791321c6f98d1a4e7210a40d1baeafcdec9524513"
+  },
+  "results/seed_metrics.csv": {
+    "bytes": 696,
+    "sha256": "c528676de4f3ffb1803148026b3ea3dac1bca53597724edb63fcd9e15be5006b"
+  },
+  "results/slice_metrics.csv": {
+    "bytes": 1718,
+    "sha256": "4da103e18afe345cc5a47705b24f9bc354d0d399471c1442c77887eabca6a8dd"
+  },
+  "results/test_predictions.csv": {
+    "bytes": 629466,
+    "sha256": "49f78dbd775dd22d97cb30ba52f3c340eb14634818707d0caa873a0bf0a97d83"
+  },
+  "results/training_runs.csv": {
+    "bytes": 727,
+    "sha256": "1725b1333cd3ec0149c8a5f297d1dcc67ba2608e1aca66f622b95777deae4948"
+  },
+  "results/verification.json": {
+    "bytes": 330,
+    "sha256": "2711e597497f435c3e28197555663af3a7859cbb83d525b727c9c659d51220b6"
+  },
+  "src/pipeline.py": {
+    "bytes": 17673,
+    "sha256": "06b259d07a9282c2e820c4cbba9c37bde380dd4e383bc248144d97139372ad8f"
+  },
+  "src/verify.py": {
+    "bytes": 2946,
+    "sha256": "f9caa5900185cbc7ac61292bee3a7e86b928d1fb484a5f3e65531e1a9c362d9e"
+  }
+}

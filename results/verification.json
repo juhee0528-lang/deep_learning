@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "hourly continuity and counts",
+    "raw target alignment",
+    "independent MAE and RMSE",
+    "calibration interval quantile and coverage",
+    "validation-only seed selection",
+    "checkpoint prediction reproduction",
+    "training-only scaling",
+    "past-only forecast window"
+  ]
+}

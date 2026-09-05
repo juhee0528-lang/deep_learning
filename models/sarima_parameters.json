@@ -1,0 +1,21 @@
+{
+  "parameter_names": [
+    "ar.L1",
+    "ar.L2",
+    "ma.L1",
+    "ma.L2",
+    "ar.S.L24",
+    "ma.S.L24",
+    "sigma2"
+  ],
+  "parameters": [
+    0.9691935587915432,
+    -0.4406109524576791,
+    -0.07461696706609862,
+    0.27681703450908174,
+    0.9982098784115205,
+    -1.1174808113601193,
+    461311.33398446115
+  ],
+  "reconstruction": "SARIMAX(training_target, order=(2,1,2), seasonal_order=(1,0,1,24), enforce_stationarity=False, enforce_invertibility=False).filter(parameters)"
+}
